@@ -1,5 +1,5 @@
--- RITUAL HUB - Simplified Mobile Button Fix
--- Black & Gold, Vertical, Clean
+-- RITUAL HUB - Sacred Style, Vertical, No Bottom Bar
+-- Draggable by top header, R button toggles visibility
 -- Author: Ritualz999
 
 local Players = game:GetService("Players")
@@ -14,36 +14,35 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "RitualHub"
 gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.DisplayOrder = 999  -- Ensure it's on top
+gui.DisplayOrder = 999
 gui.Parent = Player:WaitForChild("PlayerGui")
 
--- ===== R BUTTON (TextButton - handles both tap and drag) =====
+-- ===== R BUTTON (TextButton - tap to toggle, drag to reposition) =====
 local rButton = Instance.new("TextButton")
-rButton.Size = UDim2.new(0, 80, 0, 80)          -- Big enough for mobile
+rButton.Size = UDim2.new(0, 80, 0, 80)
 rButton.Position = UDim2.new(0.02, 0, 0.02, 0)
 rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-rButton.BackgroundTransparency = 0              -- Fully opaque
+rButton.BackgroundTransparency = 0
 rButton.BorderSizePixel = 4
-rButton.BorderColor3 = Color3.fromRGB(255, 215, 0) -- Gold
+rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)  -- Gold
 rButton.Text = "R"
 rButton.TextColor3 = Color3.fromRGB(255, 215, 0)
 rButton.TextScaled = true
 rButton.Font = Enum.Font.GothamBold
 rButton.TextSize = 40
-rButton.AutoButtonColor = false                 -- Prevent auto darkening
+rButton.AutoButtonColor = false
 rButton.ClipsDescendants = true
 rButton.ZIndex = 999
 rButton.Parent = gui
 
--- Round corners
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(1, 0)
 corner.Parent = rButton
 
--- ===== MAIN FRAME (Vertical, Sacred style) =====
+-- ===== MAIN FRAME (Vertical, Sacred style, no bottom bar) =====
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 280, 0, 380)
-mainFrame.Position = UDim2.new(0.5, -140, 0.5, -190)
+mainFrame.Size = UDim2.new(0, 280, 0, 320)  -- Slightly shorter without bottom bar
+mainFrame.Position = UDim2.new(0.5, -140, 0.5, -160)
 mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 3
@@ -72,18 +71,26 @@ local innerCorner = Instance.new("UICorner")
 innerCorner.CornerRadius = UDim.new(0, 12)
 innerCorner.Parent = innerBorder
 
--- Header
-local header = Instance.new("TextLabel")
+-- ===== HEADER (Draggable) =====
+local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 60)
-header.BackgroundTransparency = 1
-header.Text = "RITUAL HUB"
-header.TextColor3 = Color3.fromRGB(255, 215, 0)
-header.TextScaled = true
-header.Font = Enum.Font.GothamBold
-header.TextSize = 28
-header.TextXAlignment = Enum.TextXAlignment.Center
-header.TextYAlignment = Enum.TextYAlignment.Center
+header.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+header.BackgroundTransparency = 0
+header.BorderSizePixel = 0
+header.ZIndex = 2
 header.Parent = innerBorder
+
+local headerLabel = Instance.new("TextLabel")
+headerLabel.Size = UDim2.new(1, 0, 1, 0)
+headerLabel.BackgroundTransparency = 1
+headerLabel.Text = "RITUAL HUB"
+headerLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+headerLabel.TextScaled = true
+headerLabel.Font = Enum.Font.GothamBold
+headerLabel.TextSize = 28
+headerLabel.TextXAlignment = Enum.TextXAlignment.Center
+headerLabel.TextYAlignment = Enum.TextYAlignment.Center
+headerLabel.Parent = header
 
 -- Subtitle
 local subtitle = Instance.new("TextLabel")
@@ -108,9 +115,9 @@ divider.BackgroundTransparency = 0.5
 divider.BorderSizePixel = 0
 divider.Parent = innerBorder
 
--- Empty content area
+-- Empty content area (just black space with gold border)
 local emptyArea = Instance.new("Frame")
-emptyArea.Size = UDim2.new(0.9, 0, 0.6, 0)
+emptyArea.Size = UDim2.new(0.9, 0, 0.65, 0)
 emptyArea.Position = UDim2.new(0.05, 0, 0.25, 0)
 emptyArea.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 emptyArea.BackgroundTransparency = 0.2
@@ -123,58 +130,49 @@ local emptyCorner = Instance.new("UICorner")
 emptyCorner.CornerRadius = UDim.new(0, 8)
 emptyCorner.Parent = emptyArea
 
--- Bottom bar
-local bottomBar = Instance.new("Frame")
-bottomBar.Size = UDim2.new(0.9, 0, 0, 40)
-bottomBar.Position = UDim2.new(0.05, 0, 0.87, 0)
-bottomBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-bottomBar.BackgroundTransparency = 0.4
-bottomBar.BorderSizePixel = 2
-bottomBar.BorderColor3 = Color3.fromRGB(255, 215, 0)
-bottomBar.Parent = innerBorder
+-- No bottom bar – removed as requested
 
-local bottomCorner = Instance.new("UICorner")
-bottomCorner.CornerRadius = UDim.new(0, 6)
-bottomCorner.Parent = bottomBar
+-- ===== DRAG FUNCTIONALITY FOR HEADER (move the whole GUI) =====
+local function makeDraggable(frame)
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
 
-local f512 = Instance.new("TextLabel")
-f512.Size = UDim2.new(0.25, 0, 1, 0)
-f512.Position = UDim2.new(0.03, 0, 0, 0)
-f512.BackgroundTransparency = 1
-f512.Text = "f512"
-f512.TextColor3 = Color3.fromRGB(180, 180, 200)
-f512.TextScaled = true
-f512.Font = Enum.Font.Gotham
-f512.TextXAlignment = Enum.TextXAlignment.Left
-f512.TextYAlignment = Enum.TextYAlignment.Center
-f512.Parent = bottomBar
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or 
+           input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = mainFrame.Position
+        end
+    end)
 
-local cash = Instance.new("TextLabel")
-cash.Size = UDim2.new(0.35, 0, 1, 0)
-cash.Position = UDim2.new(0.33, 0, 0, 0)
-cash.BackgroundTransparency = 1
-cash.Text = "$4,973,310"
-cash.TextColor3 = Color3.fromRGB(255, 215, 0)
-cash.TextScaled = true
-cash.Font = Enum.Font.GothamBold
-cash.TextXAlignment = Enum.TextXAlignment.Center
-cash.TextYAlignment = Enum.TextYAlignment.Center
-cash.Parent = bottomBar
+    frame.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.Touch or 
+                         input.UserInputType == Enum.UserInputType.MouseMovement) then
+            local delta = input.Position - dragStart
+            local newX = startPos.X.Scale + (delta.X / screenSize.X)
+            local newY = startPos.Y.Scale + (delta.Y / screenSize.Y)
+            -- Clamp to screen
+            newX = math.clamp(newX, 0, 1 - (mainFrame.Size.X.Offset / screenSize.X))
+            newY = math.clamp(newY, 0, 1 - (mainFrame.Size.Y.Offset / screenSize.Y))
+            mainFrame.Position = UDim2.new(newX, 0, newY, 0)
+        end
+    end)
 
-local version = Instance.new("TextLabel")
-version.Size = UDim2.new(0.35, 0, 1, 0)
-version.Position = UDim2.new(0.62, 0, 0, 0)
-version.BackgroundTransparency = 1
-version.Text = "v31.4.0-Sea3:3249/131"
-version.TextColor3 = Color3.fromRGB(180, 180, 200)
-version.TextScaled = true
-version.Font = Enum.Font.Gotham
-version.TextSize = 9
-version.TextXAlignment = Enum.TextXAlignment.Right
-version.TextYAlignment = Enum.TextYAlignment.Center
-version.Parent = bottomBar
+    frame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or 
+           input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+            dragStart = nil
+            startPos = nil
+        end
+    end)
+end
 
--- ===== TOGGLE & DRAG LOGIC =====
+makeDraggable(header)  -- Now the header can be dragged to move the GUI
+
+-- ===== TOGGLE & DRAG FOR R BUTTON =====
 local isVisible = false
 local isDragging = false
 local dragStart = nil
@@ -202,7 +200,6 @@ rButton.InputBegan:Connect(function(input)
         isDragging = false
         dragStart = input.Position
         buttonStartPos = rButton.Position
-        -- Visual feedback
         rButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         rButton.BorderSizePixel = 5
     end
@@ -228,23 +225,20 @@ end)
 rButton.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseButton1 then
-        -- Reset visual
         rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         if not isVisible then
             rButton.BorderSizePixel = 4
         end
-        -- If not a drag, toggle
         if not isDragging then
             toggleGUI()
         end
-        -- Reset state
         isDragging = false
         dragStart = nil
         buttonStartPos = nil
     end
 end)
 
--- Fallback touch events (some devices)
+-- Fallback events
 rButton.TouchTap:Connect(function()
     if not isDragging then
         toggleGUI()
@@ -257,13 +251,13 @@ rButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- ===== ENSURE BUTTON IS INTERACTABLE =====
--- Keep it on top and visible
+-- ===== ENSURE BUTTON IS ON TOP =====
 RunService.Heartbeat:Connect(function()
     rButton.Visible = true
     rButton.ZIndex = 999
 end)
 
-print("✅ RITUAL HUB LOADED - Mobile Button Fixed")
+print("✅ RITUAL HUB - Vertical, No Bottom Bar, Header Draggable")
 print("📱 Tap the gold 'R' button to toggle GUI")
-print("🔄 Drag the gold 'R' button to reposition")
+print("🔄 Drag the 'R' button to reposition it")
+print("🔄 Drag the header 'RITUAL HUB' to move the whole GUI")
