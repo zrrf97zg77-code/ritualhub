@@ -1,4 +1,4 @@
--- RITUAL HUB - Mobile Only (Smaller GUI, Fixed Click)
+-- RITUAL HUB - Mobile Only (Fixed Click & Drag)
 -- Black Background with Gold Outlines
 
 local Players = game:GetService("Players")
@@ -16,25 +16,33 @@ gui.Parent = Player:WaitForChild("PlayerGui")
 
 local screenSize = workspace.CurrentCamera.ViewportSize
 
--- ===== DRAGGABLE R BUTTON (Smaller) =====
-local rButton = Instance.new("Frame")
+-- ===== DRAGGABLE R BUTTON (TextButton for better touch) =====
+local rButton = Instance.new("TextButton")
 rButton.Name = "RButton"
-rButton.Size = UDim2.new(0, 60, 0, 60) -- Smaller
+rButton.Size = UDim2.new(0, 60, 0, 60)
 rButton.Position = UDim2.new(0.02, 0, 0.02, 0)
 rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 rButton.BackgroundTransparency = 0
 rButton.BorderSizePixel = 3
-rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)
-rButton.Active = true
+rButton.BorderColor3 = Color3.fromRGB(255, 215, 0) -- Gold
+rButton.AutoButtonColor = false  -- Prevent auto color change
+rButton.Text = "R"
+rButton.TextColor3 = Color3.fromRGB(255, 215, 0)
+rButton.TextScaled = true
+rButton.Font = Enum.Font.GothamBold
+rButton.TextSize = 35
+rButton.TextXAlignment = Enum.TextXAlignment.Center
+rButton.TextYAlignment = Enum.TextYAlignment.Center
 rButton.Visible = true
 rButton.ZIndex = 999
 rButton.Parent = gui
 
+-- R Button Corner (circle)
 local rCorner = Instance.new("UICorner")
 rCorner.CornerRadius = UDim.new(1, 0)
 rCorner.Parent = rButton
 
--- Inner gold border
+-- Inner gold border (for extra style)
 local innerGold = Instance.new("Frame")
 innerGold.Size = UDim2.new(0.85, 0, 0.85, 0)
 innerGold.Position = UDim2.new(0.075, 0, 0.075, 0)
@@ -42,34 +50,14 @@ innerGold.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 innerGold.BorderSizePixel = 2
 innerGold.BorderColor3 = Color3.fromRGB(255, 215, 0)
 innerGold.BackgroundTransparency = 0
+innerGold.ZIndex = 998  -- Behind button
 innerGold.Parent = rButton
 
 local innerCorner = Instance.new("UICorner")
 innerCorner.CornerRadius = UDim.new(1, 0)
 innerCorner.Parent = innerGold
 
--- R Text
-local rText = Instance.new("TextLabel")
-rText.Size = UDim2.new(1, 0, 1, 0)
-rText.BackgroundTransparency = 1
-rText.Text = "R"
-rText.TextColor3 = Color3.fromRGB(255, 215, 0)
-rText.TextScaled = true
-rText.Font = Enum.Font.GothamBold
-rText.TextSize = 35
-rText.TextXAlignment = Enum.TextXAlignment.Center
-rText.TextYAlignment = Enum.TextYAlignment.Center
-rText.Parent = rButton
-
--- Click Button (must be on top)
-local clickButton = Instance.new("ImageButton")
-clickButton.Size = UDim2.new(1, 0, 1, 0)
-clickButton.BackgroundTransparency = 1
-clickButton.Image = ""
-clickButton.ZIndex = 1000
-clickButton.Parent = rButton
-
--- Glow effect
+-- Glow effect behind button
 local glow = Instance.new("Frame")
 glow.Size = UDim2.new(1.4, 0, 1.4, 0)
 glow.Position = UDim2.new(-0.2, 0, -0.2, 0)
@@ -83,10 +71,10 @@ local glowCorner = Instance.new("UICorner")
 glowCorner.CornerRadius = UDim.new(1, 0)
 glowCorner.Parent = glow
 
--- ===== MAIN GUI FRAME (Smaller) =====
+-- ===== MAIN GUI FRAME (Small) =====
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 250, 0, 320) -- Smaller
+mainFrame.Size = UDim2.new(0, 250, 0, 320)
 mainFrame.Position = UDim2.new(0.5, -125, 0.5, -160)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0
@@ -176,8 +164,12 @@ local bottomCorner = Instance.new("UICorner")
 bottomCorner.CornerRadius = UDim.new(0, 4)
 bottomCorner.Parent = bottomBar
 
--- ===== TOGGLE LOGIC =====
+-- ===== TOGGLE & DRAG LOGIC =====
 local isVisible = false
+local isDragging = false
+local dragStart = nil
+local buttonStartPos = nil
+local dragThreshold = 15  -- pixels to distinguish drag from tap
 
 local function toggleGUI()
     isVisible = not isVisible
@@ -186,100 +178,75 @@ local function toggleGUI()
     if isVisible then
         rButton.BorderColor3 = Color3.fromRGB(255, 230, 100)
         rButton.BorderSizePixel = 4
-        rText.TextColor3 = Color3.fromRGB(255, 230, 100)
+        rButton.TextColor3 = Color3.fromRGB(255, 230, 100)
         innerGold.BorderColor3 = Color3.fromRGB(255, 230, 100)
         glow.BackgroundTransparency = 0.7
     else
         rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)
         rButton.BorderSizePixel = 3
-        rText.TextColor3 = Color3.fromRGB(255, 215, 0)
+        rButton.TextColor3 = Color3.fromRGB(255, 215, 0)
         innerGold.BorderColor3 = Color3.fromRGB(255, 215, 0)
         glow.BackgroundTransparency = 0.85
     end
 end
 
--- ===== CLICK DETECTION (with drag prevention) =====
-local isDragging = false
-local dragStartPos = nil
-local buttonStartPos = nil
-local touchMoved = false
-
--- Track touch movement to differentiate click vs drag
-clickButton.TouchBegin:Connect(function(touch)
-    isDragging = false
-    touchMoved = false
-    dragStartPos = touch.Position
-    buttonStartPos = rButton.Position
-    -- Visual feedback
-    rButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    rButton.BorderSizePixel = 5
-end)
-
-clickButton.TouchMoved:Connect(function(touch)
-    local delta = touch.Position - dragStartPos
-    if delta.Magnitude > 10 then
-        touchMoved = true
-        isDragging = true
-        -- Move the button
-        local newX = buttonStartPos.X.Scale + (delta.X / screenSize.X)
-        local newY = buttonStartPos.Y.Scale + (delta.Y / screenSize.Y)
-        newX = math.clamp(newX, 0, 1 - (rButton.Size.X.Offset / screenSize.X))
-        newY = math.clamp(newY, 0, 1 - (rButton.Size.Y.Offset / screenSize.Y))
-        rButton.Position = UDim2.new(newX, 0, newY, 0)
+-- Handle input on the button itself
+rButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or 
+       input.UserInputType == Enum.UserInputType.MouseButton1 then
+        -- Record start position for drag detection
+        isDragging = false
+        dragStart = input.Position
+        buttonStartPos = rButton.Position
+        -- Visual feedback
+        rButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        rButton.BorderSizePixel = 5
     end
 end)
 
-clickButton.TouchEnd:Connect(function()
-    rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    if not isVisible then
-        rButton.BorderSizePixel = 3
-    end
-    -- Only toggle if it wasn't a drag
-    if not touchMoved then
-        toggleGUI()
-    end
-    isDragging = false
-    touchMoved = false
-end)
-
--- Also support mouse for testing
-clickButton.MouseButton1Down:Connect(function()
-    isDragging = false
-    touchMoved = false
-    dragStartPos = UserInputService:GetMouseLocation()
-    buttonStartPos = rButton.Position
-    rButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    rButton.BorderSizePixel = 5
-end)
-
-clickButton.MouseMoved:Connect(function()
-    if isDragging then return end
-    local mousePos = UserInputService:GetMouseLocation()
-    if dragStartPos then
-        local delta = mousePos - dragStartPos
-        if delta.Magnitude > 10 then
-            touchMoved = true
-            isDragging = true
-            local newX = buttonStartPos.X.Scale + (delta.X / screenSize.X)
-            local newY = buttonStartPos.Y.Scale + (delta.Y / screenSize.Y)
-            newX = math.clamp(newX, 0, 1 - (rButton.Size.X.Offset / screenSize.X))
-            newY = math.clamp(newY, 0, 1 - (rButton.Size.Y.Offset / screenSize.Y))
-            rButton.Position = UDim2.new(newX, 0, newY, 0)
+rButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or 
+       input.UserInputType == Enum.UserInputType.MouseMovement then
+        if dragStart and buttonStartPos then
+            local delta = input.Position - dragStart
+            if delta.Magnitude > dragThreshold then
+                isDragging = true
+                -- Move button
+                local newX = buttonStartPos.X.Scale + (delta.X / screenSize.X)
+                local newY = buttonStartPos.Y.Scale + (delta.Y / screenSize.Y)
+                newX = math.clamp(newX, 0, 1 - (rButton.Size.X.Offset / screenSize.X))
+                newY = math.clamp(newY, 0, 1 - (rButton.Size.Y.Offset / screenSize.Y))
+                rButton.Position = UDim2.new(newX, 0, newY, 0)
+            end
         end
     end
 end)
 
-clickButton.MouseButton1Up:Connect(function()
-    rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    if not isVisible then
-        rButton.BorderSizePixel = 3
+rButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or 
+       input.UserInputType == Enum.UserInputType.MouseButton1 then
+        -- Reset appearance
+        if not isVisible then
+            rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            rButton.BorderSizePixel = 3
+        end
+        -- If not dragging, treat as tap/click
+        if not isDragging then
+            toggleGUI()
+        end
+        -- Clear drag state
+        isDragging = false
+        dragStart = nil
+        buttonStartPos = nil
     end
-    if not touchMoved then
+end)
+
+-- Also handle touch tap directly (in case InputEnded doesn't fire)
+rButton.TouchTap:Connect(function()
+    -- Only toggle if not dragging (we use a variable to prevent double toggle)
+    if not isDragging then
         toggleGUI()
     end
-    isDragging = false
-    touchMoved = false
-    dragStartPos = nil
 end)
 
 -- ===== PULSE ANIMATION =====
@@ -300,7 +267,7 @@ RunService.Heartbeat:Connect(function()
     rButton.ZIndex = 999
 end)
 
-print("✅ RITUAL HUB - Mobile Optimized (Smaller GUI)")
-print("📱 Tap the gold R button to toggle GUI (tap, don't drag)")
-print("🔄 Drag the R button to reposition it")
+print("✅ RITUAL HUB - Mobile Optimized (Fixed Click & Drag)")
+print("📱 Tap the gold R button to toggle GUI")
+print("🔄 Drag the R button to reposition it (drag more than 15 pixels)")
 print("⚫ Black & Gold theme")
