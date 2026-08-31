@@ -1,5 +1,5 @@
--- RITUAL HUB - Sacred Style, Vertical, No Bottom Bar
--- Draggable by top header, R button toggles visibility
+-- RITUAL HUB - Sacred Style, Horizontal, No Bottom Bar
+-- Header Draggable, R Button Toggle
 -- Author: Ritualz999
 
 local Players = game:GetService("Players")
@@ -17,14 +17,14 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.DisplayOrder = 999
 gui.Parent = Player:WaitForChild("PlayerGui")
 
--- ===== R BUTTON (TextButton - tap to toggle, drag to reposition) =====
+-- ===== R BUTTON =====
 local rButton = Instance.new("TextButton")
 rButton.Size = UDim2.new(0, 80, 0, 80)
 rButton.Position = UDim2.new(0.02, 0, 0.02, 0)
 rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 rButton.BackgroundTransparency = 0
 rButton.BorderSizePixel = 4
-rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)  -- Gold
+rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)
 rButton.Text = "R"
 rButton.TextColor3 = Color3.fromRGB(255, 215, 0)
 rButton.TextScaled = true
@@ -35,14 +35,14 @@ rButton.ClipsDescendants = true
 rButton.ZIndex = 999
 rButton.Parent = gui
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(1, 0)
-corner.Parent = rButton
+local rCorner = Instance.new("UICorner")
+rCorner.CornerRadius = UDim.new(1, 0)
+rCorner.Parent = rButton
 
--- ===== MAIN FRAME (Vertical, Sacred style, no bottom bar) =====
+-- ===== MAIN FRAME (Horizontal) =====
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 280, 0, 320)  -- Slightly shorter without bottom bar
-mainFrame.Position = UDim2.new(0.5, -140, 0.5, -160)
+mainFrame.Size = UDim2.new(0, 380, 0, 200)   -- wider than tall
+mainFrame.Position = UDim2.new(0.5, -190, 0.5, -100)
 mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 3
@@ -71,9 +71,9 @@ local innerCorner = Instance.new("UICorner")
 innerCorner.CornerRadius = UDim.new(0, 12)
 innerCorner.Parent = innerBorder
 
--- ===== HEADER (Draggable) =====
+-- ===== HEADER (Draggable area) =====
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 60)
+header.Size = UDim2.new(0.35, 0, 1, 0)  -- left part for header
 header.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 header.BackgroundTransparency = 0
 header.BorderSizePixel = 0
@@ -87,38 +87,39 @@ headerLabel.Text = "RITUAL HUB"
 headerLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
 headerLabel.TextScaled = true
 headerLabel.Font = Enum.Font.GothamBold
-headerLabel.TextSize = 28
-headerLabel.TextXAlignment = Enum.TextXAlignment.Center
+headerLabel.TextSize = 24
+headerLabel.TextXAlignment = Enum.TextXAlignment.Left
 headerLabel.TextYAlignment = Enum.TextYAlignment.Center
+headerLabel.PaddingLeft = UDim.new(0, 16)
 headerLabel.Parent = header
 
--- Subtitle
+-- Subtitle (next to header)
 local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(1, 0, 0, 30)
-subtitle.Position = UDim2.new(0, 0, 0, 60)
+subtitle.Size = UDim2.new(0.4, 0, 1, 0)
+subtitle.Position = UDim2.new(0.35, 0, 0, 0)
 subtitle.BackgroundTransparency = 1
 subtitle.Text = "by Ritualz999"
 subtitle.TextColor3 = Color3.fromRGB(180, 180, 200)
 subtitle.TextScaled = true
 subtitle.Font = Enum.Font.Gotham
 subtitle.TextSize = 14
-subtitle.TextXAlignment = Enum.TextXAlignment.Center
-subtitle.TextYAlignment = Enum.TextYAlignment.Top
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.TextYAlignment = Enum.TextYAlignment.Center
 subtitle.Parent = innerBorder
 
--- Divider
+-- Divider (vertical line)
 local divider = Instance.new("Frame")
-divider.Size = UDim2.new(0.9, 0, 0, 2)
-divider.Position = UDim2.new(0.05, 0, 0, 92)
+divider.Size = UDim2.new(0, 2, 0.7, 0)
+divider.Position = UDim2.new(0.8, 0, 0.15, 0)
 divider.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
 divider.BackgroundTransparency = 0.5
 divider.BorderSizePixel = 0
 divider.Parent = innerBorder
 
--- Empty content area (just black space with gold border)
+-- Empty content area (right side)
 local emptyArea = Instance.new("Frame")
-emptyArea.Size = UDim2.new(0.9, 0, 0.65, 0)
-emptyArea.Position = UDim2.new(0.05, 0, 0.25, 0)
+emptyArea.Size = UDim2.new(0.15, 0, 0.7, 0)
+emptyArea.Position = UDim2.new(0.83, 0, 0.15, 0)
 emptyArea.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 emptyArea.BackgroundTransparency = 0.2
 emptyArea.BorderSizePixel = 2
@@ -130,9 +131,7 @@ local emptyCorner = Instance.new("UICorner")
 emptyCorner.CornerRadius = UDim.new(0, 8)
 emptyCorner.Parent = emptyArea
 
--- No bottom bar – removed as requested
-
--- ===== DRAG FUNCTIONALITY FOR HEADER (move the whole GUI) =====
+-- ===== DRAG THE WHOLE GUI BY THE HEADER =====
 local function makeDraggable(frame)
     local dragging = false
     local dragStart = nil
@@ -153,7 +152,6 @@ local function makeDraggable(frame)
             local delta = input.Position - dragStart
             local newX = startPos.X.Scale + (delta.X / screenSize.X)
             local newY = startPos.Y.Scale + (delta.Y / screenSize.Y)
-            -- Clamp to screen
             newX = math.clamp(newX, 0, 1 - (mainFrame.Size.X.Offset / screenSize.X))
             newY = math.clamp(newY, 0, 1 - (mainFrame.Size.Y.Offset / screenSize.Y))
             mainFrame.Position = UDim2.new(newX, 0, newY, 0)
@@ -170,7 +168,11 @@ local function makeDraggable(frame)
     end)
 end
 
-makeDraggable(header)  -- Now the header can be dragged to move the GUI
+-- Make the entire header draggable (the left part with "RITUAL HUB")
+makeDraggable(header)
+
+-- Also make the subtitle area draggable so the whole top bar works
+makeDraggable(subtitle)
 
 -- ===== TOGGLE & DRAG FOR R BUTTON =====
 local isVisible = false
@@ -193,7 +195,7 @@ local function toggleGUI()
     end
 end
 
--- Button input handling
+-- R button input handling
 rButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -251,13 +253,13 @@ rButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- ===== ENSURE BUTTON IS ON TOP =====
+-- ===== ENSURE BUTTON ON TOP =====
 RunService.Heartbeat:Connect(function()
     rButton.Visible = true
     rButton.ZIndex = 999
 end)
 
-print("✅ RITUAL HUB - Vertical, No Bottom Bar, Header Draggable")
-print("📱 Tap the gold 'R' button to toggle GUI")
-print("🔄 Drag the 'R' button to reposition it")
-print("🔄 Drag the header 'RITUAL HUB' to move the whole GUI")
+print("✅ RITUAL HUB - Horizontal, No Bottom Bar, Header Draggable")
+print("📱 Tap gold 'R' to toggle GUI")
+print("🔄 Drag 'R' to reposition the toggle button")
+print("🔄 Drag the 'RITUAL HUB' header to move the whole GUI")
