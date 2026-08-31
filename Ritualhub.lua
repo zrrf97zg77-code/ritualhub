@@ -1,5 +1,5 @@
 -- RITUAL HUB - Horizontal, No Bottom Bar, Header Draggable
--- R Button as TextButton (60x60) – Fixed Tap & Drag
+-- R Button using UserInputService (100% reliable tap & drag)
 -- Author: Ritualz999
 
 local Players = game:GetService("Players")
@@ -17,28 +17,52 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.DisplayOrder = 999
 gui.Parent = Player:WaitForChild("PlayerGui")
 
--- ===== R BUTTON (TextButton – 60x60) =====
-local rButton = Instance.new("TextButton")
-rButton.Size = UDim2.new(0, 60, 0, 60)
+-- ===== R BUTTON (Frame with TextLabel) =====
+local buttonSize = 60
+local rButton = Instance.new("Frame")
+rButton.Size = UDim2.new(0, buttonSize, 0, buttonSize)
 rButton.Position = UDim2.new(0.02, 0, 0.02, 0)
 rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-rButton.BackgroundTransparency = 0            -- fully opaque
+rButton.BackgroundTransparency = 0   -- fully opaque
 rButton.BorderSizePixel = 4
 rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)  -- Gold
-rButton.Text = "R"
-rButton.TextColor3 = Color3.fromRGB(255, 215, 0)
-rButton.TextScaled = true
-rButton.Font = Enum.Font.GothamBold
-rButton.TextSize = 30
-rButton.AutoButtonColor = false               -- no automatic darkening
 rButton.ClipsDescendants = true
 rButton.ZIndex = 999
 rButton.Parent = gui
 
--- Round corners (circle)
+-- Round corners
 local rCorner = Instance.new("UICorner")
 rCorner.CornerRadius = UDim.new(1, 0)
 rCorner.Parent = rButton
+
+-- "R" text
+local rText = Instance.new("TextLabel")
+rText.Size = UDim2.new(1, 0, 1, 0)
+rText.BackgroundTransparency = 1
+rText.Text = "R"
+rText.TextColor3 = Color3.fromRGB(255, 215, 0)
+rText.TextScaled = true
+rText.Font = Enum.Font.GothamBold
+rText.TextSize = 30
+rText.TextXAlignment = Enum.TextXAlignment.Center
+rText.TextYAlignment = Enum.TextYAlignment.Center
+rText.ZIndex = 1000
+rText.Parent = rButton
+
+-- Inner gold ring (decorative)
+local innerRing = Instance.new("Frame")
+innerRing.Size = UDim2.new(0.85, 0, 0.85, 0)
+innerRing.Position = UDim2.new(0.075, 0, 0.075, 0)
+innerRing.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+innerRing.BackgroundTransparency = 0.3
+innerRing.BorderSizePixel = 2
+innerRing.BorderColor3 = Color3.fromRGB(255, 215, 0)
+innerRing.ZIndex = 998
+innerRing.Parent = rButton
+
+local innerCorner = Instance.new("UICorner")
+innerCorner.CornerRadius = UDim.new(1, 0)
+innerCorner.Parent = innerRing
 
 -- ===== MAIN FRAME (Horizontal) =====
 local mainFrame = Instance.new("Frame")
@@ -68,15 +92,15 @@ innerBorder.BorderColor3 = Color3.fromRGB(255, 215, 0)
 innerBorder.ClipsDescendants = true
 innerBorder.Parent = mainFrame
 
-local innerCorner = Instance.new("UICorner")
-innerCorner.CornerRadius = UDim.new(0, 12)
-innerCorner.Parent = innerBorder
+local innerCornerMain = Instance.new("UICorner")
+innerCornerMain.CornerRadius = UDim.new(0, 12)
+innerCornerMain.Parent = innerBorder
 
--- ===== HEADER (Draggable area) =====
+-- ===== HEADER (Draggable) =====
 local header = Instance.new("Frame")
 header.Size = UDim2.new(0.35, 0, 1, 0)
 header.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-header.BackgroundTransparency = 0   -- fully opaque to catch touches
+header.BackgroundTransparency = 0
 header.BorderSizePixel = 0
 header.ZIndex = 2
 header.Parent = innerBorder
@@ -94,7 +118,7 @@ headerLabel.TextYAlignment = Enum.TextYAlignment.Center
 headerLabel.PaddingLeft = UDim.new(0, 16)
 headerLabel.Parent = header
 
--- Subtitle (also draggable)
+-- Subtitle
 local subtitle = Instance.new("TextLabel")
 subtitle.Size = UDim2.new(0.4, 0, 1, 0)
 subtitle.Position = UDim2.new(0.35, 0, 0, 0)
@@ -108,7 +132,7 @@ subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.TextYAlignment = Enum.TextYAlignment.Center
 subtitle.Parent = innerBorder
 
--- Divider (vertical)
+-- Divider
 local divider = Instance.new("Frame")
 divider.Size = UDim2.new(0, 2, 0.7, 0)
 divider.Position = UDim2.new(0.8, 0, 0.15, 0)
@@ -117,7 +141,7 @@ divider.BackgroundTransparency = 0.5
 divider.BorderSizePixel = 0
 divider.Parent = innerBorder
 
--- Empty content area (right side)
+-- Empty content area
 local emptyArea = Instance.new("Frame")
 emptyArea.Size = UDim2.new(0.15, 0, 0.7, 0)
 emptyArea.Position = UDim2.new(0.83, 0, 0.15, 0)
@@ -132,7 +156,7 @@ local emptyCorner = Instance.new("UICorner")
 emptyCorner.CornerRadius = UDim.new(0, 8)
 emptyCorner.Parent = emptyArea
 
--- ===== DRAG GUI BY HEADER (works on both header and subtitle) =====
+-- ===== DRAG GUI BY HEADER =====
 local function makeDraggable(frame)
     local dragging = false
     local dragStart = nil
@@ -170,9 +194,9 @@ local function makeDraggable(frame)
 end
 
 makeDraggable(header)
-makeDraggable(subtitle)  -- also draggable
+makeDraggable(subtitle)
 
--- ===== R BUTTON TOGGLE & DRAG LOGIC =====
+-- ===== R BUTTON INTERACTION VIA UserInputService =====
 local isVisible = false
 local isDragging = false
 local dragStart = nil
@@ -185,31 +209,47 @@ local function toggleGUI()
     if isVisible then
         rButton.BorderColor3 = Color3.fromRGB(255, 230, 100)
         rButton.BorderSizePixel = 5
-        rButton.TextColor3 = Color3.fromRGB(255, 230, 100)
+        rText.TextColor3 = Color3.fromRGB(255, 230, 100)
+        innerRing.BorderColor3 = Color3.fromRGB(255, 230, 100)
     else
         rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)
         rButton.BorderSizePixel = 4
-        rButton.TextColor3 = Color3.fromRGB(255, 215, 0)
+        rText.TextColor3 = Color3.fromRGB(255, 215, 0)
+        innerRing.BorderColor3 = Color3.fromRGB(255, 215, 0)
     end
 end
 
--- Input events on the button itself
-rButton.InputBegan:Connect(function(input)
+-- Helper: check if a point is inside the button
+local function isPointOnButton(point)
+    local absPos = rButton.AbsolutePosition
+    local size = rButton.AbsoluteSize
+    return point.X >= absPos.X and point.X <= absPos.X + size.X and
+           point.Y >= absPos.Y and point.Y <= absPos.Y + size.Y
+end
+
+-- Track input globally
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDragging = false
-        dragStart = input.Position
-        buttonStartPos = rButton.Position
-        rButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        rButton.BorderSizePixel = 5
+        local pos = input.Position
+        if isPointOnButton(pos) then
+            isDragging = false
+            dragStart = pos
+            buttonStartPos = rButton.Position
+            rButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            rButton.BorderSizePixel = 5
+        end
     end
 end)
 
-rButton.InputChanged:Connect(function(input)
+UserInputService.InputChanged:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseMovement then
         if dragStart and buttonStartPos then
-            local delta = input.Position - dragStart
+            local pos = input.Position
+            local delta = pos - dragStart
             if delta.Magnitude > dragThreshold then
                 isDragging = true
                 local newX = buttonStartPos.X.Scale + (delta.X / screenSize.X)
@@ -222,43 +262,32 @@ rButton.InputChanged:Connect(function(input)
     end
 end)
 
-rButton.InputEnded:Connect(function(input)
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseButton1 then
-        rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        if not isVisible then
-            rButton.BorderSizePixel = 4
+        if dragStart then  -- only if we started on the button
+            rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            if not isVisible then
+                rButton.BorderSizePixel = 4
+            end
+            if not isDragging then
+                toggleGUI()
+            end
+            isDragging = false
+            dragStart = nil
+            buttonStartPos = nil
         end
-        -- If not dragging, toggle
-        if not isDragging then
-            toggleGUI()
-        end
-        isDragging = false
-        dragStart = nil
-        buttonStartPos = nil
     end
 end)
 
--- Fallback events for reliability
-rButton.TouchTap:Connect(function()
-    if not isDragging then
-        toggleGUI()
-    end
-end)
-
-rButton.MouseButton1Click:Connect(function()
-    if not isDragging then
-        toggleGUI()
-    end
-end)
-
--- ===== ENSURE R BUTTON STAYS ON TOP =====
+-- ===== ENSURE R BUTTON ON TOP =====
 RunService.Heartbeat:Connect(function()
     rButton.Visible = true
     rButton.ZIndex = 999
 end)
 
 print("✅ RITUAL HUB - Horizontal, No Bottom Bar, Header Draggable")
-print("📱 Tap the gold 'R' button (60x60) to toggle GUI")
-print("🔄 Drag the 'R' button to reposition it")
+print("📱 Tap the gold 'R' button (using UserInputService) to toggle")
+print("🔄 Drag the 'R' button to reposition")
 print("🔄 Drag the 'RITUAL HUB' header to move the whole GUI")
