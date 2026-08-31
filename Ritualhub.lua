@@ -1,6 +1,7 @@
--- RITUAL HUB - Sacred AHK Style (Mobile Optimized)
+-- RITUAL HUB - Sacred AHK Style (Mobile Fixed Button)
 -- Black Glass with Gold Outlines | Vertical | Clean
 -- Author: Ritualz999
+-- Fixed: R button now responds to tap and drag reliably
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
@@ -17,16 +18,17 @@ gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = Player:WaitForChild("PlayerGui")
 
--- ===== R BUTTON (Frame for dragging + Button for clicking) =====
-local buttonSize = 70
-local rButton = Instance.new("Frame")
-rButton.Size = UDim2.new(0, buttonSize, 0, buttonSize)
+-- ===== R BUTTON (TextButton - handles both tap and drag) =====
+local rButton = Instance.new("TextButton")
+rButton.Size = UDim2.new(0, 70, 0, 70)
 rButton.Position = UDim2.new(0.02, 0, 0.02, 0)
 rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 rButton.BackgroundTransparency = 0.2
 rButton.BorderSizePixel = 3
 rButton.BorderColor3 = Color3.fromRGB(255, 215, 0) -- Gold
 rButton.ClipsDescendants = true
+rButton.AutoButtonColor = false  -- Prevent automatic color changes
+rButton.Text = ""
 rButton.ZIndex = 999
 rButton.Parent = gui
 
@@ -64,7 +66,7 @@ local glowCorner = Instance.new("UICorner")
 glowCorner.CornerRadius = UDim.new(1, 0)
 glowCorner.Parent = glow
 
--- "R" Text inside
+-- "R" Text inside (as a separate label to avoid button text issues)
 local rText = Instance.new("TextLabel")
 rText.Size = UDim2.new(1, 0, 1, 0)
 rText.BackgroundTransparency = 1
@@ -78,17 +80,9 @@ rText.TextYAlignment = Enum.TextYAlignment.Center
 rText.ZIndex = 1000
 rText.Parent = rButton
 
--- CLICK BUTTON (covers entire R button for reliable tapping)
-local clickButton = Instance.new("ImageButton")
-clickButton.Size = UDim2.new(1, 0, 1, 0)
-clickButton.BackgroundTransparency = 1
-clickButton.Image = ""
-clickButton.ZIndex = 1001
-clickButton.Parent = rButton
-
 -- ===== SACRED-STYLE MAIN FRAME (Vertical) =====
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 280, 0, 380)  -- Taller than wide
+mainFrame.Size = UDim2.new(0, 280, 0, 380)
 mainFrame.Position = UDim2.new(0.5, -140, 0.5, -190)
 mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 mainFrame.BackgroundTransparency = 0.15
@@ -132,7 +126,7 @@ header.TextXAlignment = Enum.TextXAlignment.Center
 header.TextYAlignment = Enum.TextYAlignment.Center
 header.Parent = innerGlow
 
--- Subtitle (updated to Ritualz999)
+-- Subtitle
 local subtitle = Instance.new("TextLabel")
 subtitle.Size = UDim2.new(1, 0, 0, 30)
 subtitle.Position = UDim2.new(0, 0, 0, 60)
@@ -251,13 +245,14 @@ local function toggleGUI()
     end
 end
 
--- ===== DRAG HANDLING (on the outer Frame) =====
+-- ===== DRAG + CLICK HANDLING ON THE TEXTBUTTON =====
 rButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseButton1 then
         isDragging = false
         dragStart = input.Position
         buttonStartPos = rButton.Position
+        -- Visual feedback
         rButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         rButton.BorderSizePixel = 5
     end
@@ -283,10 +278,15 @@ end)
 rButton.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseButton1 then
+        -- Reset visual
         rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         rButton.BackgroundTransparency = 0.2
         if not isVisible then
             rButton.BorderSizePixel = 3
+        end
+        -- If not a drag, toggle
+        if not isDragging then
+            toggleGUI()
         end
         -- Reset drag state
         isDragging = false
@@ -295,15 +295,16 @@ rButton.InputEnded:Connect(function(input)
     end
 end)
 
--- ===== CLICK HANDLING (on the clickButton) =====
--- Use both TouchTap and MouseButton1Click for reliability
-clickButton.TouchTap:Connect(function()
+-- Fallback: TouchTap event (some devices may not fire InputEnded reliably)
+rButton.TouchTap:Connect(function()
+    -- Only toggle if not dragging and not already in a drag sequence
     if not isDragging then
         toggleGUI()
     end
 end)
 
-clickButton.MouseButton1Click:Connect(function()
+-- Also handle MouseButton1Click as a fallback for PC testing
+rButton.MouseButton1Click:Connect(function()
     if not isDragging then
         toggleGUI()
     end
