@@ -1,5 +1,5 @@
--- RITUAL HUB - Sacred Style, Horizontal, No Bottom Bar
--- Header Draggable, R Button Toggle
+-- RITUAL HUB - Horizontal, No Bottom Bar, Header Draggable
+-- R Button Fully Functional (Tap & Drag)
 -- Author: Ritualz999
 
 local Players = game:GetService("Players")
@@ -17,14 +17,14 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.DisplayOrder = 999
 gui.Parent = Player:WaitForChild("PlayerGui")
 
--- ===== R BUTTON =====
+-- ===== R BUTTON (TextButton) =====
 local rButton = Instance.new("TextButton")
 rButton.Size = UDim2.new(0, 80, 0, 80)
 rButton.Position = UDim2.new(0.02, 0, 0.02, 0)
 rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-rButton.BackgroundTransparency = 0
+rButton.BackgroundTransparency = 0  -- fully opaque
 rButton.BorderSizePixel = 4
-rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)
+rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)  -- Gold
 rButton.Text = "R"
 rButton.TextColor3 = Color3.fromRGB(255, 215, 0)
 rButton.TextScaled = true
@@ -41,7 +41,7 @@ rCorner.Parent = rButton
 
 -- ===== MAIN FRAME (Horizontal) =====
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 380, 0, 200)   -- wider than tall
+mainFrame.Size = UDim2.new(0, 380, 0, 200)
 mainFrame.Position = UDim2.new(0.5, -190, 0.5, -100)
 mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 mainFrame.BackgroundTransparency = 0.15
@@ -73,9 +73,9 @@ innerCorner.Parent = innerBorder
 
 -- ===== HEADER (Draggable area) =====
 local header = Instance.new("Frame")
-header.Size = UDim2.new(0.35, 0, 1, 0)  -- left part for header
+header.Size = UDim2.new(0.35, 0, 1, 0)
 header.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-header.BackgroundTransparency = 0
+header.BackgroundTransparency = 0  -- fully opaque to catch touches
 header.BorderSizePixel = 0
 header.ZIndex = 2
 header.Parent = innerBorder
@@ -93,7 +93,7 @@ headerLabel.TextYAlignment = Enum.TextYAlignment.Center
 headerLabel.PaddingLeft = UDim.new(0, 16)
 headerLabel.Parent = header
 
--- Subtitle (next to header)
+-- Subtitle
 local subtitle = Instance.new("TextLabel")
 subtitle.Size = UDim2.new(0.4, 0, 1, 0)
 subtitle.Position = UDim2.new(0.35, 0, 0, 0)
@@ -107,7 +107,7 @@ subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.TextYAlignment = Enum.TextYAlignment.Center
 subtitle.Parent = innerBorder
 
--- Divider (vertical line)
+-- Divider (vertical)
 local divider = Instance.new("Frame")
 divider.Size = UDim2.new(0, 2, 0.7, 0)
 divider.Position = UDim2.new(0.8, 0, 0.15, 0)
@@ -116,7 +116,7 @@ divider.BackgroundTransparency = 0.5
 divider.BorderSizePixel = 0
 divider.Parent = innerBorder
 
--- Empty content area (right side)
+-- Empty content area
 local emptyArea = Instance.new("Frame")
 emptyArea.Size = UDim2.new(0.15, 0, 0.7, 0)
 emptyArea.Position = UDim2.new(0.83, 0, 0.15, 0)
@@ -131,7 +131,7 @@ local emptyCorner = Instance.new("UICorner")
 emptyCorner.CornerRadius = UDim.new(0, 8)
 emptyCorner.Parent = emptyArea
 
--- ===== DRAG THE WHOLE GUI BY THE HEADER =====
+-- ===== DRAG GUI BY HEADER =====
 local function makeDraggable(frame)
     local dragging = false
     local dragStart = nil
@@ -168,13 +168,10 @@ local function makeDraggable(frame)
     end)
 end
 
--- Make the entire header draggable (the left part with "RITUAL HUB")
 makeDraggable(header)
+makeDraggable(subtitle)  -- also draggable
 
--- Also make the subtitle area draggable so the whole top bar works
-makeDraggable(subtitle)
-
--- ===== TOGGLE & DRAG FOR R BUTTON =====
+-- ===== R BUTTON LOGIC =====
 local isVisible = false
 local isDragging = false
 local dragStart = nil
@@ -195,7 +192,7 @@ local function toggleGUI()
     end
 end
 
--- R button input handling
+-- Drag & Tap handling for R button
 rButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -227,10 +224,12 @@ end)
 rButton.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseButton1 then
+        -- Reset visual
         rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         if not isVisible then
             rButton.BorderSizePixel = 4
         end
+        -- If not a drag, toggle
         if not isDragging then
             toggleGUI()
         end
@@ -240,7 +239,7 @@ rButton.InputEnded:Connect(function(input)
     end
 end)
 
--- Fallback events
+-- Fallback touch events (some devices)
 rButton.TouchTap:Connect(function()
     if not isDragging then
         toggleGUI()
@@ -253,7 +252,7 @@ rButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- ===== ENSURE BUTTON ON TOP =====
+-- ===== KEEP R BUTTON ON TOP =====
 RunService.Heartbeat:Connect(function()
     rButton.Visible = true
     rButton.ZIndex = 999
