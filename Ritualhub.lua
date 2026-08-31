@@ -1,6 +1,6 @@
--- RITUAL HUB - Sacred AHK Style (Mobile Fixed)
--- Black Glass Background with Gold Outlines
--- Fully functional draggable R button
+-- RITUAL HUB - Sacred AHK Style (Mobile Optimized)
+-- Black Glass with Gold Outlines | Vertical | Clean
+-- Author: Ritualz999
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
@@ -17,20 +17,15 @@ gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = Player:WaitForChild("PlayerGui")
 
--- ===== DRAGGABLE R BUTTON (TextButton) =====
-local rButton = Instance.new("TextButton")
-rButton.Size = UDim2.new(0, 65, 0, 65)
+-- ===== R BUTTON (Frame for dragging + Button for clicking) =====
+local buttonSize = 70
+local rButton = Instance.new("Frame")
+rButton.Size = UDim2.new(0, buttonSize, 0, buttonSize)
 rButton.Position = UDim2.new(0.02, 0, 0.02, 0)
 rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-rButton.BackgroundTransparency = 0.15   -- slight glass effect
+rButton.BackgroundTransparency = 0.2
 rButton.BorderSizePixel = 3
-rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)
-rButton.AutoButtonColor = false
-rButton.Text = "R"
-rButton.TextColor3 = Color3.fromRGB(255, 215, 0)
-rButton.TextScaled = true
-rButton.Font = Enum.Font.GothamBold
-rButton.TextSize = 35
+rButton.BorderColor3 = Color3.fromRGB(255, 215, 0) -- Gold
 rButton.ClipsDescendants = true
 rButton.ZIndex = 999
 rButton.Parent = gui
@@ -45,7 +40,7 @@ local innerRing = Instance.new("Frame")
 innerRing.Size = UDim2.new(0.85, 0, 0.85, 0)
 innerRing.Position = UDim2.new(0.075, 0, 0.075, 0)
 innerRing.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-innerRing.BackgroundTransparency = 0.3
+innerRing.BackgroundTransparency = 0.4
 innerRing.BorderSizePixel = 2
 innerRing.BorderColor3 = Color3.fromRGB(255, 215, 0)
 innerRing.ZIndex = 998
@@ -69,11 +64,33 @@ local glowCorner = Instance.new("UICorner")
 glowCorner.CornerRadius = UDim.new(1, 0)
 glowCorner.Parent = glow
 
--- ===== SACRED-STYLE MAIN FRAME =====
+-- "R" Text inside
+local rText = Instance.new("TextLabel")
+rText.Size = UDim2.new(1, 0, 1, 0)
+rText.BackgroundTransparency = 1
+rText.Text = "R"
+rText.TextColor3 = Color3.fromRGB(255, 215, 0)
+rText.TextScaled = true
+rText.Font = Enum.Font.GothamBold
+rText.TextSize = 40
+rText.TextXAlignment = Enum.TextXAlignment.Center
+rText.TextYAlignment = Enum.TextYAlignment.Center
+rText.ZIndex = 1000
+rText.Parent = rButton
+
+-- CLICK BUTTON (covers entire R button for reliable tapping)
+local clickButton = Instance.new("ImageButton")
+clickButton.Size = UDim2.new(1, 0, 1, 0)
+clickButton.BackgroundTransparency = 1
+clickButton.Image = ""
+clickButton.ZIndex = 1001
+clickButton.Parent = rButton
+
+-- ===== SACRED-STYLE MAIN FRAME (Vertical) =====
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 340, 0, 460)
-mainFrame.Position = UDim2.new(0.5, -170, 0.5, -230)
-mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)  -- dark glass
+mainFrame.Size = UDim2.new(0, 280, 0, 380)  -- Taller than wide
+mainFrame.Position = UDim2.new(0.5, -140, 0.5, -190)
+mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 3
 mainFrame.BorderColor3 = Color3.fromRGB(255, 215, 0)
@@ -82,12 +99,11 @@ mainFrame.Visible = false
 mainFrame.ZIndex = 100
 mainFrame.Parent = gui
 
--- Rounded corners
 local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 16)
 mainCorner.Parent = mainFrame
 
--- Inner glow border (gold)
+-- Inner gold border
 local innerGlow = Instance.new("Frame")
 innerGlow.Size = UDim2.new(0.97, 0, 0.97, 0)
 innerGlow.Position = UDim2.new(0.015, 0, 0.015, 0)
@@ -104,24 +120,24 @@ innerCornerMain.Parent = innerGlow
 
 -- ===== HEADER =====
 local header = Instance.new("TextLabel")
-header.Size = UDim2.new(1, 0, 0, 55)
+header.Size = UDim2.new(1, 0, 0, 60)
 header.Position = UDim2.new(0, 0, 0, 0)
 header.BackgroundTransparency = 1
 header.Text = "RITUAL HUB"
 header.TextColor3 = Color3.fromRGB(255, 215, 0)
 header.TextScaled = true
 header.Font = Enum.Font.GothamBold
-header.TextSize = 26
+header.TextSize = 28
 header.TextXAlignment = Enum.TextXAlignment.Center
 header.TextYAlignment = Enum.TextYAlignment.Center
 header.Parent = innerGlow
 
--- Subtitle (like "by iSacredRivals")
+-- Subtitle (updated to Ritualz999)
 local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(1, 0, 0, 25)
-subtitle.Position = UDim2.new(0, 0, 0, 55)
+subtitle.Size = UDim2.new(1, 0, 0, 30)
+subtitle.Position = UDim2.new(0, 0, 0, 60)
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "by iSacredRivals"
+subtitle.Text = "by Ritualz999"
 subtitle.TextColor3 = Color3.fromRGB(180, 180, 200)
 subtitle.TextScaled = true
 subtitle.Font = Enum.Font.Gotham
@@ -133,50 +149,31 @@ subtitle.Parent = innerGlow
 -- Divider line
 local divider = Instance.new("Frame")
 divider.Size = UDim2.new(0.9, 0, 0, 2)
-divider.Position = UDim2.new(0.05, 0, 0, 82)
+divider.Position = UDim2.new(0.05, 0, 0, 92)
 divider.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
 divider.BackgroundTransparency = 0.5
 divider.BorderSizePixel = 0
 divider.Parent = innerGlow
 
--- ===== SECTIONS (Empty with labels) =====
-local sections = {"Combat Main", "Glitches", "Soru Engine", "Songs & Music"}
-local yPos = 0.18
-for i, name in ipairs(sections) do
-    local sectionFrame = Instance.new("Frame")
-    sectionFrame.Size = UDim2.new(0.9, 0, 0, 30)
-    sectionFrame.Position = UDim2.new(0.05, 0, yPos, 0)
-    sectionFrame.BackgroundTransparency = 1
-    sectionFrame.Parent = innerGlow
-    
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = name
-    label.TextColor3 = Color3.fromRGB(200, 200, 220)
-    label.TextScaled = true
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 15
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.TextYAlignment = Enum.TextYAlignment.Center
-    label.Parent = sectionFrame
-    
-    -- Small divider under each section
-    local smallDiv = Instance.new("Frame")
-    smallDiv.Size = UDim2.new(0.9, 0, 0, 1)
-    smallDiv.Position = UDim2.new(0.05, 0, 1, 0)
-    smallDiv.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-    smallDiv.BackgroundTransparency = 0.6
-    smallDiv.BorderSizePixel = 0
-    smallDiv.Parent = sectionFrame
-    
-    yPos = yPos + 0.08
-end
+-- Empty space (just background)
+local emptySpace = Instance.new("Frame")
+emptySpace.Size = UDim2.new(0.9, 0, 0.6, 0)
+emptySpace.Position = UDim2.new(0.05, 0, 0.25, 0)
+emptySpace.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+emptySpace.BackgroundTransparency = 0.2
+emptySpace.BorderSizePixel = 2
+emptySpace.BorderColor3 = Color3.fromRGB(255, 215, 0)
+emptySpace.ClipsDescendants = true
+emptySpace.Parent = innerGlow
+
+local emptyCorner = Instance.new("UICorner")
+emptyCorner.CornerRadius = UDim.new(0, 8)
+emptyCorner.Parent = emptySpace
 
 -- ===== BOTTOM INFO BAR =====
 local bottomBar = Instance.new("Frame")
-bottomBar.Size = UDim2.new(0.9, 0, 0, 35)
-bottomBar.Position = UDim2.new(0.05, 0, 0.88, 0)
+bottomBar.Size = UDim2.new(0.9, 0, 0, 40)
+bottomBar.Position = UDim2.new(0.05, 0, 0.87, 0)
 bottomBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 bottomBar.BackgroundTransparency = 0.4
 bottomBar.BorderSizePixel = 2
@@ -190,7 +187,7 @@ bottomCorner.Parent = bottomBar
 -- f512
 local f512 = Instance.new("TextLabel")
 f512.Size = UDim2.new(0.25, 0, 1, 0)
-f512.Position = UDim2.new(0.02, 0, 0, 0)
+f512.Position = UDim2.new(0.03, 0, 0, 0)
 f512.BackgroundTransparency = 1
 f512.Text = "f512"
 f512.TextColor3 = Color3.fromRGB(180, 180, 200)
@@ -218,7 +215,7 @@ cash.Parent = bottomBar
 -- Version
 local version = Instance.new("TextLabel")
 version.Size = UDim2.new(0.35, 0, 1, 0)
-version.Position = UDim2.new(0.63, 0, 0, 0)
+version.Position = UDim2.new(0.62, 0, 0, 0)
 version.BackgroundTransparency = 1
 version.Text = "v31.4.0-Sea3:3249/131"
 version.TextColor3 = Color3.fromRGB(180, 180, 200)
@@ -242,19 +239,19 @@ local function toggleGUI()
     if isVisible then
         rButton.BorderColor3 = Color3.fromRGB(255, 230, 100)
         rButton.BorderSizePixel = 4
-        rButton.TextColor3 = Color3.fromRGB(255, 230, 100)
+        rText.TextColor3 = Color3.fromRGB(255, 230, 100)
         innerRing.BorderColor3 = Color3.fromRGB(255, 230, 100)
         glow.BackgroundTransparency = 0.7
     else
         rButton.BorderColor3 = Color3.fromRGB(255, 215, 0)
         rButton.BorderSizePixel = 3
-        rButton.TextColor3 = Color3.fromRGB(255, 215, 0)
+        rText.TextColor3 = Color3.fromRGB(255, 215, 0)
         innerRing.BorderColor3 = Color3.fromRGB(255, 215, 0)
         glow.BackgroundTransparency = 0.85
     end
 end
 
--- DIRECT INPUT HANDLING ON THE BUTTON
+-- ===== DRAG HANDLING (on the outer Frame) =====
 rButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -287,21 +284,26 @@ rButton.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or 
        input.UserInputType == Enum.UserInputType.MouseButton1 then
         rButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        rButton.BackgroundTransparency = 0.15
+        rButton.BackgroundTransparency = 0.2
         if not isVisible then
             rButton.BorderSizePixel = 3
         end
-        if not isDragging then
-            toggleGUI()
-        end
+        -- Reset drag state
         isDragging = false
         dragStart = nil
         buttonStartPos = nil
     end
 end)
 
--- Fallback for touch tap (some devices may not fire InputEnded)
-rButton.TouchTap:Connect(function()
+-- ===== CLICK HANDLING (on the clickButton) =====
+-- Use both TouchTap and MouseButton1Click for reliability
+clickButton.TouchTap:Connect(function()
+    if not isDragging then
+        toggleGUI()
+    end
+end)
+
+clickButton.MouseButton1Click:Connect(function()
     if not isDragging then
         toggleGUI()
     end
@@ -325,7 +327,7 @@ RunService.Heartbeat:Connect(function()
     rButton.ZIndex = 999
 end)
 
-print("✅ RITUAL HUB - Sacred Style Loaded")
-print("📱 Tap the gold R button to toggle GUI")
+print("✅ RITUAL HUB - Sacred Style | Made by Ritualz999")
+print("📱 Tap the gold R button ONCE to toggle GUI")
 print("🔄 Drag the R button to reposition")
-print("⚫ Dark glass with gold outlines")
+print("⚫ Vertical, clean design - no extra text")
